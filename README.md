@@ -6,4 +6,15 @@ Features:
     (Don't try to find all their dialogue bubbles, it will take too long.)
   * Music/Ambient sound choice: "Eldrum: Ryke Valley", "Rain", "Waves" and "Medieval"!
 
-How to use:
+# How to use:
+1) Download the zip file
+2) EXTRACT the files to a folder
+3) Open Pomodoroman.html
+   
+   ## Note: If you run Pomodoroman.html directly from the zip file, the background and other stuff will not load, and you will be sad :(
+
+
+
+
+### What is the .bat file for?
+In case the audio files (played from YouTube via api) don't play due to browser restrictions, running the .bat file will create a local server so they can load properly without being blocked.
