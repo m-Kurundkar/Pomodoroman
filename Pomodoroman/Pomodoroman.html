@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomodoro Companion</title>
+    <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    body {
+        font-family: "IBM Plex Sans", "Trebuchet MS", Tahoma, sans-serif;
+        background-image: url('stars.jpg');
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 14px;
+        color: #2a2a2a;
+    }
+
+    .container {
+        background: #fbfeff;
+        border-radius: 8px;
+        padding: 44px 38px;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+        max-width: 500px;
+        width: 100%;
+        max-height: 80%;
+        margin: 40px 0;
+        text-align: center;
+        border: 1px solid #eee8e3;
+    }
+
+    h1 {
+        color: #4c5d95;
+        margin-bottom: 6px;
+        font-size: 1.9em;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+    }
+
+    .subtitle {
+        color: #0c0303;
+        margin-bottom: 28px;
+        font-size: 0.95em;
+        font-style: italic;
+    }
+
+    .timer-display {
+        font-size: 4.8em;
+        font-weight: 700;
+        color: #2a2a2a;
+        margin: 26px 0;
+        font-variant-numeric: tabular-nums;
+        text-shadow: 0 1px 0 rgba(0,0,0,0.05);
+    }
+
+    .timer-display.break-mode {
+        color: #419e94;
+    }
+
+    .mode-selector {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        margin-bottom: 18px;
+    }
+
+    .mode-btn {
+        background: #f6f6f6;
+        color: #555555;
+        padding: 9px 20px;
+        border-radius: 4px;
+        font-size: 0.92em;
+        border: 1.5px solid #ddd;
+        font-weight: 600;
+        transition: background 0.2s, transform 0.1s;
+        
+        
+    }
+
+    .mode-btn.active {
+        background: #4b63b3;
+        color: white;
+        border-color: #3f55a0;
+        box-shadow: 0.25px 0.5px 0.5px rgba(172, 181, 209, 0.5);
+    }
+
+    .mode-btn:hover:not(.active) {
+        background: #ececec;
+    }
+
+    .session-counter {
+        background: #4b63b3;
+        color: white;
+        padding: 8px 20px;
+        border-radius: 12px;
+        display: inline-block;
+        margin-bottom: 22px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+    }
+
+    .controls {
+        display: flex;
+        gap: 14px;
+        justify-content: center;
+        margin: 32px 0;
+    }
+
+    button {
+  background: #000;
+  color: white;
+  border: none;
+  padding: 14px 34px;
+  border-radius: 4px;
+  font-size: 1.05em;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url('stars.jpg') center/cover no-repeat;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+  pointer-events: none; /* lets clicks pass through */
+}
+
+button:hover::before {
+  opacity: 1; /* fade in the stars */
+}
+
+button:hover {
+  transform: scale(1.03);
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+
+    .sound-controls {
+        margin-top: 32px;
+        padding-top: 28px;
+        border-top: 1px solid #eaeaea;
+    }
+
+    .sound-title {
+        color: #555;
+        margin-bottom: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85em;
+        letter-spacing: 0.8px;
+    }
+
+    .sound-buttons {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .sound-btn {
+        background: #f4f4f4;
+        color: #444;
+        padding: 9px 18px;
+        border-radius: 2px;
+        font-size: 0.88em;
+        border: 1px solid #cac4d4;
+        transition: background 0.2s;
+        text-shadow: -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white;
+    }
+
+    .sound-btn.active {
+        background-image: url('stars.jpg'); 
+        color: #444;
+        border-color: #368a82;
+        box-shadow: 0 2px 6px rgba(65,158,148,0.25);
+    }
+
+    .sound-btn:hover:not(.active) {
+        background: #e8e8e8;
+    }
+
+    .volume-control {
+        margin-top: 14px;
+    }
+
+    .volume-slider {
+        width: 190px;
+        margin: 10px auto;
+        accent-color: #303d68;
+    }
+    
+    /* Companion Styles */
+    .companion {
+        position: fixed;
+        bottom: 28px;
+        right: 28px;
+        width: 82px;
+        height: 82px;
+        background: #000000;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 8px 24px rgba(217, 212, 143, 0.45);
+        transition: transform 0.3s, box-shadow 0.3s;
+        animation: idle-bob 2.5s ease-in-out infinite;
+        z-index: 1000;
+    }
+
+    .companion:hover {
+        transform: scale(1.08) rotate(-2deg);
+        box-shadow: 0 12px 32px rgba(217, 212, 143, 0.45);
+    }
+
+    .companion-face {
+        font-size: 2.6em;
+        filter: saturate(0.9);
+    }
+
+    @keyframes idle-bob {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-6px); }
+    }
+
+    .companion.speaking {
+        animation: pulse 0.6s ease-in-out;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+
+    .message-bubble {
+        position: fixed;
+        bottom: 122px;
+        right: 30px;
+        background: #fff;
+        padding: 14px 18px;
+        border-radius: 14px 14px 2px 14px;
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12);
+        max-width: 240px;
+        opacity: 0;
+        transform: translateY(16px);
+        transition: all 0.3s ease-out;
+        pointer-events: none;
+        z-index: 999;
+    }
+
+    .message-bubble.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .message-bubble::after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        right: 24px;
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-top: 8px solid white;
+    }
+
+    .message-text {
+        color: #2a2a2a;
+        font-weight: 500;
+        font-size: 0.95em;
+    }
+
+    @keyframes sparkle {
+        0%, 100% { opacity: 0; transform: scale(0); }
+        50% { opacity: 1; transform: scale(1); }
+    }
+
+    .companion.celebrating::before {
+        content: '✨';
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        font-size: 1.3em;
+        animation: sparkle 0.6s ease-in-out;
+    }
+
+    .companion-switch {
+        position: fixed;
+        bottom: 34px;
+        right: 126px;
+        width: 12px;
+        height: 12px;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.25s;
+        z-index: 1001;
+        box-shadow: 0 1px 6px rgba(0,0,0,0.15);
+    }
+
+    .companion-switch:hover {
+        background: rgba(255, 255, 255, 0.9);
+        transform: scale(1.25);
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+    }
+</style>
+
+</head>
+<body>
+    
+    <div class="container">
+        <h1>Pomodoroman </h1>
+        <p class="subtitle">"There is no excuse for defeat."</p>
+        
+        <div class="mode-selector">
+            <button class="mode-btn active" data-work="25" data-break="5">25/5</button>
+            <button class="mode-btn" data-work="50" data-break="15">50/15</button>
+            <button class="mode-btn" data-work="90" data-break="30">90/30</button>
+        </div>
+        
+        <div class="session-counter">
+            Sessions Done: <span id="sessionCount">0</span>
+        </div>
+        
+        <div class="timer-display" id="timerDisplay">25:00</div>
+        
+        <div class="controls">
+            <button id="startBtn">Start</button>
+            <button id="pauseBtn" disabled>Pause</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+        
+        <div class="sound-controls">
+            <div class="sound-title">Work in Silence, or:</div>
+            <div class="sound-buttons">
+                <button class="sound-btn" data-sound="eldrum">🎵 Eldrum: Ryke Valley</button>
+                <button class="sound-btn" data-sound="waves">🌧️ Waves</button>
+                <button class="sound-btn" data-sound="library">📖 Library</button>
+                <button class="sound-btn" data-sound="med">⚔️ Medieval</button>
+            </div>
+            <div class="volume-control">
+                <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="50">
+                <div>Volume: <span id="volumeValue">50</span>%</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="companion" id="companion">
+        <div class="companion-face" id="companionFace">🌚</div>
+    </div>
+
+    <div class="companion-switch" id="companionSwitch" title="Switch companion"></div>
+
+    <div class="message-bubble" id="messageBubble">
+        <div class="message-text" id="messageText"></div>
+    </div>
+    
+    <div id="youtube-player-container" style="position: fixed; bottom: -200px; left: 0; width: 1px; height: 1px; opacity: 0;">
+        <div id="player"></div>
+    </div>
+    <script src="https://www.youtube.com/iframe_api"></script>
+
+    <script>
+        // Timer State
+        let workDuration = 25;
+        let breakDuration = 5;
+        let timeLeft = workDuration * 60;
+        let isRunning = false;
+        let isBreak = false;
+        let interval = null;
+        let sessionsCompleted = 0;
+
+        // Audio Context
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        let currentOscillator = null;
+        let gainNode = null;
+        const timerEndSound = new Audio('Dingding.mp3');
+        function playTimerEndSound() {
+            timerEndSound.play();
+            }
+
+        // Companions Data
+        const companions = [
+            
+            {
+                name: "Moon",
+                emoji: "🌚",
+                color: "#000000",
+                messages: {
+                    start: ["The stars are watching; don't let them down.", "[Moon is looking at you intently]", "✨"],
+                    working: ["Time to look busy.", "Engage focus mode. Or at least, try to.", "I'm going through a phase right now..."],
+                    break: ["Stretch, snack, or stare at nothing. Your choice."],
+                    click: ["The stars are watching; don't let them down.", "[Moon is looking at you intently]", "✨"],
+                    complete: ["Done! Moonie approves. ", "You survived another session — congrats, human."]
+                }
+            },
+            {
+    name: "Mom",
+    emoji: "👩‍🦳",
+    color: "#161466",
+    messages: {
+        start: [
+            "Did you do your homework??",
+            "Sit up straight and focus. Now.",
+            "No excuses. Time to start.",
+        ],
+        working: [
+            "I didn’t raise a slacker.",
+            "Eyes on the task, don’t drift.",
+            "You said you’d do this — so do it properly.",
+            "That's right. Keep going."
+        ],
+        break: [
+            "Fine, take a short break.",
+            "Want something to eat?",
+            "Break’s over soon — don’t get too comfortable."
+        ],
+        click: ["Hmm..."],
+        complete: [
+            "Well done. Don’t make me remind you again."
+        ]
+    }
+},
+{
+    name: "Alhaitham",
+    emoji: '',
+    color: "url('Alt1.jpg') center/cover no-repeat",
+    messages: {
+        start: [
+            "The scribe’s work is simple — which is exactly why I took the position.",
+            "If you’re mentally prepared, let’s begin.",
+            "I’m Alhaitham, the Akademiya’s scribe. Submit your request properly.",
+            "It’s a little early for me… let me get a cup of coffee first."
+        ],
+        working: [
+            "Book learning alone is not enough to cultivate intelligence.",
+            "Rather than lacing my words with rhetoric, I prefer speaking factually.",
+            "I value practicality — aesthetics aren’t generally worth my time.",
+            "Focus and precision. That’s how results are made."
+        ],
+        break: [
+            "If there’s nothing to do, I’ll just put on my earpieces and nap for a while.",
+            "This weather is perfect for doing nothing at all.",
+            "It’s nice and quiet here. Don’t disturb the peace.",
+            "I’ll be taking some time for myself now. Goodbye."
+        ],
+        click:["Don't poke me."],
+        complete: [
+            "It seems you’re perfectly capable of taking care of yourself.",
+            "The top priority is your satisfaction. Everything else is secondary.",
+            "Task completed — no unnecessary embellishment needed.",
+            "I suppose that concludes it. Efficiently done."
+        ]
+    }
+},
+            {
+                name: "Hypey",
+                emoji: "⚡",
+                color: "#fb2b2b" ,
+                messages: {
+                    start: ["Time to level up~ ⚡", "Ready to dominate?", "ACTIVATE BEAST MODE!"],
+                    working: ["UNSTOPPABLE!", "That's the spirit! 💥", "On fire right now! 🔥", "Nothing can stop you! Except you."],
+                    break: ["Power down for a bit!", "Quick recharge! ⚡", "Cooldown period~", "Restore that energy!"],
+                    click:["I'm getting charged!"],
+                    complete: ["LEGENDARY! 🏆", "You're a champion! ⚡", "CRUSHING IT! 💪"]
+                }
+            }
+        ];
+
+        let currentCompanionIndex = 0;
+
+        // Messages (will be updated based on companion)
+        let messages = companions[0].messages;
+
+        // Elements
+        const timerDisplay = document.getElementById('timerDisplay');
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const sessionCount = document.getElementById('sessionCount');
+        const companion = document.getElementById('companion');
+        const companionFace = document.getElementById('companionFace');
+        const companionSwitch = document.getElementById('companionSwitch');
+        const messageBubble = document.getElementById('messageBubble');
+        const messageText = document.getElementById('messageText');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeValue = document.getElementById('volumeValue');
+        const soundButtons = document.querySelectorAll('.sound-btn');
+        const modeButtons = document.querySelectorAll('.mode-btn');
+
+        // Timer Functions
+        function updateDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            timeString=timerDisplay.textContent;
+            
+            if (isRunning) {
+                document.title = `${timeString} - Pomodoroman`;
+            } else {
+                document.title = 'Pomodoroman';
+            }
+            if (isBreak) {
+                timerDisplay.classList.add('break-mode');
+            } else {
+                timerDisplay.classList.remove('break-mode');
+            }
+        }
+
+        function startTimer() {
+            if (!isRunning) {
+                isRunning = true;
+                startBtn.disabled = true;
+                pauseBtn.disabled = false;
+                
+                if (timeLeft === workDuration * 60) {
+                    showMessage(messages.start);
+                }
+                
+                interval = setInterval(() => {
+                    timeLeft--;
+                    updateDisplay();
+                    
+                    if (timeLeft === 0) {
+                        clearInterval(interval);
+                        playTimerEndSound();
+                        isRunning = false;
+                        
+                        if (!isBreak) {
+                            sessionsCompleted++;
+                            sessionCount.textContent = sessionsCompleted;
+                            companion.classList.add('celebrating');
+                            setTimeout(() => companion.classList.remove('celebrating'), 600);
+                            showMessage(messages.complete);
+                            startBreak();
+                        } else {
+                            endBreak();
+                        }
+                    }
+                }, 1000);
+            }
+        }
+
+        function pauseTimer() {
+            isRunning = false;
+            clearInterval(interval);
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            isBreak = false;
+            timeLeft = workDuration * 60;
+            updateDisplay();
+        }
+
+        function startBreak() {
+            isBreak = true;
+            timeLeft = breakDuration * 60;
+            updateDisplay();
+            showMessage(messages.break);
+            setTimeout(() => {
+                if (!isRunning) {
+                    startBtn.disabled = false;
+                }
+            }, 2000);
+        }
+
+        function endBreak() {
+            isBreak = false;
+            timeLeft = workDuration * 60;
+            updateDisplay();
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+        }
+
+        // Companion Functions
+        function switchCompanion() {
+            currentCompanionIndex = (currentCompanionIndex + 1) % companions.length;
+            const currentCompanion = companions[currentCompanionIndex];
+            
+            // Update appearance (using innerHTML to support both emoji and images)
+            companionFace.innerHTML = currentCompanion.emoji;
+            companion.style.background = currentCompanion.color;
+            
+            // Update messages
+            messages = currentCompanion.messages;
+            
+            // Show greeting
+            const greetings = [
+                `${currentCompanion.name} reporting for duty!`
+            ];
+            const greeting = greetings[Math.floor(Math.random() * greetings.length)];
+            messageText.textContent = greeting;
+            messageBubble.classList.add('show');
+            companion.classList.add('speaking');
+            
+            setTimeout(() => {
+                messageBubble.classList.remove('show');
+                companion.classList.remove('speaking');
+            }, 3000);
+        }
+        let messageTimeout;
+        function showMessage(messageArray) {
+            const randomMessage = messageArray[Math.floor(Math.random() * messageArray.length)];
+            messageText.textContent = randomMessage;
+            messageBubble.classList.add('show');
+            companion.classList.add('speaking');
+            if (messageTimeout) clearTimeout(messageTimeout);
+
+            messageTimeout= setTimeout(() => {
+                messageBubble.classList.remove('show');
+                companion.classList.remove('speaking');
+                messageTimeout = null;
+            }, 3000);
+        }
+
+        companionSwitch.addEventListener('click', switchCompanion);
+
+        companion.addEventListener('click', () => {
+            if (isRunning && !isBreak) {
+                showMessage(messages.working);
+            } else if (isBreak) {
+                showMessage(messages.break);
+            } else {
+                showMessage(messages.click);
+            }
+        });
+
+        // YouTube Player Variables
+let player;
+let isPlayerReady = false;
+
+// YouTube Video IDs for ambient sounds
+const youtubeVideos = {
+    eldrum: '6PPH8G_ux1U',
+    waves: 'bn9F19Hi1Lk',
+    library: '2cHAeTBCu5c',
+    med: 'DS05bbBseZo'
+};
+
+// YouTube API Ready callback (must be global)
+function onYouTubeIframeAPIReady() {
+    player = new YT.Player('player', {
+        height: '1',
+        width: '1',
+        videoId: 'hqnacyWj2To', // Default video
+        playerVars: {
+            'autoplay': 0,
+            'controls': 0,
+            'loop': 1,
+            'playlist': 'hqnacyWj2To', // Required for looping
+            'rel': 0,
+            'showinfo': 0,
+            'modestbranding': 1
+        },
+        events: {
+            'onReady': function(event) {
+                isPlayerReady = true;
+                player.setVolume(50);
+                player.pauseVideo(); // Don't auto-play
+                console.log('YouTube player ready!');
+            },
+            'onStateChange': function(event) {
+                // Ensure looping
+                if (event.data === YT.PlayerState.ENDED) {
+                    player.playVideo();
+                }
+            }
+        }
+    });
+}
+
+// Play YouTube video
+function playYouTubeSound(type) {
+    if (!isPlayerReady) {
+        setTimeout(() => playYouTubeSound(type), 500);
+        return;
+    }
+    const videoId = youtubeVideos[type];
+    player.loadVideoById(videoId);
+    player.setVolume(volumeSlider.value);
+
+    //Autoplay fix
+    player.mute();
+    player.playVideo();
+    setTimeout(() => player.unMute(), 300);
+    player.setVolume(volumeSlider.value);
+
+}
+
+
+// Stop YouTube video
+function stopYouTubeSound() {
+    if (player && isPlayerReady) {
+        player.stopVideo();
+    }
+}
+        // Sound Controls
+soundButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        const wasActive = btn.classList.contains('active');
+        
+        soundButtons.forEach(b => b.classList.remove('active'));
+        
+        if (wasActive) {
+            stopYouTubeSound();
+        } else {
+            btn.classList.add('active');
+            playYouTubeSound(btn.dataset.sound);
+        }
+    });
+});
+
+// Update volume slider
+volumeSlider.addEventListener('input', (e) => {
+    const volume = e.target.value;
+    volumeValue.textContent = volume;
+    if (player && isPlayerReady) {
+        player.setVolume(volume);
+    }
+});
+
+        // Event Listeners
+        startBtn.addEventListener('click', startTimer);
+        pauseBtn.addEventListener('click', pauseTimer);
+        resetBtn.addEventListener('click', resetTimer);
+
+        // Mode Selection
+        modeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (isRunning) {
+                    alert('Please pause the timer before changing modes!');
+                    return;
+                }
+                
+                modeButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                workDuration = parseInt(btn.dataset.work);
+                breakDuration = parseInt(btn.dataset.break);
+                
+                resetTimer();
+            });
+        });
+
+        // Initialize
+        updateDisplay();
+    </script>
+    
+</body>
+</html>
