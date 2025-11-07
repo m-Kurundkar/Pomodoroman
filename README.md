@@ -9,7 +9,7 @@ Features:
 # How to use:
 1) Download the zip file
 2) EXTRACT the files to a folder
-3) Open Pomodoroman.html
+3) Run "RUN.bat"
 
 Switch the widget character by clicking the tiny white button next to the widget.
    ## Note: If you run Pomodoroman.html directly from the zip file, the background and other stuff will not load, and you will be sad :(
@@ -18,4 +18,12 @@ Switch the widget character by clicking the tiny white button next to the widget
 
 
 ### What is the .bat file for?
-In case the audio files (played from YouTube via api) don't play due to browser restrictions, running the .bat file will create a local server so they can load properly without being blocked.
+For the audio files to play. The audio is played from YouTube via IFrame API, which requires the current page to have a valid origin (local files have origin null).
+Running the .bat file will create a local server.
+# (*) You can also use "RUN.bat" as a shortcut for the timer! Just make sure it's in the same directory as the folder.
+Eg: Desktop
+    ├─ Projects                             // general folder
+    │   └─ Pomodoroman 
+            └─ Pomodoroman.html
+    └─ RUN.bat                             //on desktop
+
