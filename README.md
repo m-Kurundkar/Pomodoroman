@@ -20,10 +20,10 @@ Switch the widget character by clicking the tiny white button next to the widget
 ### What is the .bat file for?
 For the audio files to play. The audio is played from YouTube via IFrame API, which requires the current page to have a valid origin (local files have origin null).
 Running the .bat file will create a local server.
-# (*) You can also use "RUN.bat" as a shortcut for the timer! Just make sure it's in the same directory as the folder.
-Eg: Desktop
-    ├─ Projects                             // general folder
-    │   └─ Pomodoroman 
-            └─ Pomodoroman.html
-    └─ RUN.bat                             //on desktop
+## (*) You can also use "RUN.bat" as a shortcut for the timer! Just make sure it's in the same directory as the folder.
 
+Eg: Desktop  
+    ├─ Projects                             // general folder  
+    │   └─ Pomodoroman  
+         &emsp;&emsp;&emsp;  &emsp;  └─ Pomodoroman.html  
+    └─ RUN.bat                              //on desktop
